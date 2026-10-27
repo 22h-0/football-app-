@@ -1,0 +1,16 @@
+{
+  "name": "My AI Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:3.10",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.inlineSuggest.enabled": true
+      },
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-python.python"
+      ]
+    }
+  }
+}
