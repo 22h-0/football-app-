@@ -1,0 +1,42 @@
+{
+  "name": "sideline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "build:standalone": "vite build && node scripts/build-standalone.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:standalone": "npm run build:standalone && playwright test --config playwright.standalone.config.js",
+    "dev:shared": "VITE_SHARED_MODE=true vite --host 0.0.0.0",
+    "dev:server": "node --watch server/start.js",
+    "start": "node server/start.js",
+    "build:shared": "VITE_SHARED_MODE=true vite build",
+    "test:server": "node --test server/*.test.js",
+    "test:sharing": "playwright test --config playwright.sharing.config.js"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "express": "^5.3.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^26.0.0",
+    "vite": "^6.4.5",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,19 @@
+services:
+  sideline:
+    build: .
+    image: sideline:local
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_ORIGIN: ${APP_ORIGIN:?Set APP_ORIGIN to the public HTTPS origin in .env}
+      HOST: 0.0.0.0
+      PORT: "3001"
+      DATA_DIR: /data
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - sideline-data:/data
+
+volumes:
+  sideline-data:

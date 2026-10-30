@@ -1,0 +1,25 @@
+# Optional managed deployment. A paid web service and persistent disk are
+# required; review current Render prices before provisioning these resources.
+services:
+  - type: web
+    name: sideline
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/session
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "10000"
+      - key: DATA_DIR
+        value: /data
+      - key: APP_ORIGIN
+        sync: false
+    disk:
+      name: sideline-data
+      mountPath: /data
+      sizeGB: 1

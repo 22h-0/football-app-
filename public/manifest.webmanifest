@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Sideline — Football Teams & Tournaments",
+  "short_name": "Sideline",
+  "description": "Build balanced football teams, run tournaments, and share the live standings.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111413",
+  "theme_color": "#111413",
+  "icons": [
+    { "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,60 @@
+@layer components {
+  .top-scorers-section { margin-top: 31px; }
+  .top-scorers-section .section-heading svg { color: #b0cd90; }
+  .golden-boot-banner { display: flex; align-items: center; gap: 15px; margin-top: 18px; border: 1px solid #a9a66080; border-radius: 9px; padding: 18px; background: linear-gradient(110deg, #c9c16612, #c5f46708); color: #dfdf9c; }
+  .golden-boot-banner > svg { flex-shrink: 0; }
+  .golden-boot-banner > div { min-width: 0; }
+  .golden-boot-banner span { font-size: 8px; letter-spacing: 1.4px; color: #d0ce91; }
+  .golden-boot-banner h3 { font-size: 20px; font-weight: 550; letter-spacing: -.4px; margin: 7px 0; overflow-wrap: anywhere; }
+  .golden-boot-banner p { font-size: 10px; color: #b2bc91; line-height: 1.7; margin: 0; }
+  .scorer-coverage { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 16px 0 12px; color: #a7bc92; font-size: 10px; }
+  .scorer-coverage strong { font-size: 9px; color: #d7c68c; font-weight: 500; }
+  .top-scorers-list { padding: 0; margin: 0; list-style: none; border: 1px solid #3a492f; border-radius: 10px; overflow: hidden; background: #192017; }
+  .top-scorers-list li { padding: 14px 18px; display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .top-scorers-list li + li { border-top: 1px solid #34432a; }
+  .scorer-rank { width: 28px; height: 30px; display: grid; place-items: center; color: #a1b38d; flex-shrink: 0; font-size: 11px; }
+  .scorer-leading-rank { color: #c5f467; }
+  .top-scorers-list li > div { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 5px; }
+  .top-scorers-list li > div > strong { color: #e1ebd5; font-size: 12px; font-weight: 500; overflow-wrap: anywhere; }
+  .top-scorers-list li > div > span { color: #a3b790; font-size: 9px; overflow-wrap: anywhere; }
+  .scorer-total-goals { display: flex; align-items: center; gap: 7px; color: #c5f467; }
+  .scorer-total-goals strong { font-size: 21px; font-weight: 550; }
+  .scorer-total-goals > span { font-size: 7px; letter-spacing: 1px; color: #a8bd91; }
+  .scorers-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 27px 18px; border: 1px dashed #425636; border-radius: 9px; background: #c5f46703; }
+  .scorers-empty > svg { color: #b9d397; }
+  .scorers-empty h3 { font-size: 14px; font-weight: 500; color: #dce8cf; margin: 13px 0 8px; }
+  .scorers-empty p { font-size: 10px; color: #a4b891; line-height: 1.8; margin: 0; }
+  .fixture-scorers { border-top: 1px solid #34432b; padding-top: 11px; margin-top: 12px; }
+  .fixture-scorers-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .fixture-scorers-heading > span { color: #b9cea3; display: flex; align-items: center; gap: 6px; font-size: 9px; }
+  .fixture-scorers-heading .text-button { font-size: 9px; padding: 4px; }
+  .fixture-scorer-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .fixture-scorer-chip { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; background: #c5f4670a; border: 1px solid #c5f46720; color: #c6d9b3; padding: 5px 8px; border-radius: 5px; font-size: 9px; overflow-wrap: anywhere; }
+  .fixture-scorer-chip strong { display: grid; place-items: center; min-width: 16px; height: 16px; color: #c5f467; background: #c5f4670e; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
+  .fixture-unassigned { font-size: 8px; color: #a9b998; margin: 8px 0 1px; line-height: 1.8; }
+  .goalscorer-dialog { width: min(600px, calc(100% - 32px)); }
+  .goalscorer-teams { display: flex; flex-direction: column; gap: 17px; }
+  .goalscorer-team { border: 1px solid #405332; border-radius: 9px; padding: 16px; background: #10180e70; min-width: 0; }
+  .goalscorer-team > header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .goalscorer-team h3 { display: flex; align-items: center; gap: 7px; color: #dbe9ce; font-weight: 500; font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+  .goalscorer-team h3 > svg { color: #c5f467; flex-shrink: 0; }
+  .goalscorer-team header > span { color: #a8c28f; font-size: 9px; }
+  .goalscorer-team header > span.over-assigned { color: #ffb8a4; }
+  .scorer-team-empty { color: #a2b98c; font-size: 10px; margin: 16px 0; line-height: 1.8; }
+  .goalscorer-entry { display: grid; grid-template-columns: minmax(0, 1fr) 65px 29px; gap: 9px; align-items: end; margin-top: 15px; }
+  .goalscorer-entry > label { min-width: 0; }
+  .goalscorer-entry .field-label { font-size: 9px; margin-bottom: 7px; }
+  .goalscorer-entry .text-input { width: 100%; min-width: 0; padding: 10px; font-size: 11px; }
+  .scorer-goals-field .text-input { text-align: center; }
+  .goalscorer-entry .remove-scorer { height: 36px; width: 29px; margin-bottom: 1px; }
+  .add-scorer { margin-top: 14px; font-size: 10px; color: #c5f467; }
+  .unassigned-note { color: #c4ba8b; font-size: 9px; margin: 9px 0 0; }
+  .readonly-scores strong { display: grid; place-items: center; width: 38px; height: 39px; border: 1px solid #5b7142; border-radius: 6px; background: #c5f46706; color: #d9efbe; font-size: 18px; font-weight: 550; }
+  .readonly-result-text { font-size: 9px; color: #a8bb96; margin: 13px 0 0; line-height: 1.7; }
+  .fixture-kickoff-static { display: inline-flex; align-items: center; gap: 6px; color: #acbd98; font-size: 9px; line-height: 1.7; }
+  .tournament-viewer-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 17px 20px; border: 1px solid #435534; border-radius: 9px; background: #c5f46705; }
+  .tournament-viewer-actions > span { display: inline-flex; align-items: center; gap: 8px; color: #bdd2a6; font-size: 11px; }
+  .tournament-viewer-actions .button { font-size: 10px; }
+  @media (max-width: 700px) { .top-scorers-section .section-heading { align-items: start; gap: 12px; }.top-scorers-section .section-heading h2 { font-size: 17px; }.top-scorers-section .section-heading p { font-size: 9px; line-height: 1.8; }.top-scorers-list li { padding: 13px 14px; gap: 10px; }.golden-boot-banner { padding: 16px; gap: 12px; }.golden-boot-banner h3 { font-size: 18px; }.scorer-coverage { font-size: 9px; }.scorer-total-goals strong { font-size: 20px; }.fixture-kickoff-static { font-size: 10px; }.fixture-unassigned { font-size: 9px; }.goalscorer-team { padding: 14px; }.goalscorer-entry { gap: 7px; }.goalscorer-entry .text-input { padding: 11px 8px; }.goalscorer-team h3 { font-size: 12px; }.tournament-viewer-actions { padding: 15px; }.tournament-viewer-actions > span { font-size: 10px; } }
+  @media (max-width: 370px) { .goalscorer-dialog { padding: 20px 17px; }.goalscorer-team { padding: 12px; }.goalscorer-entry { grid-template-columns: minmax(0, 1fr) 51px 25px; gap: 6px; }.goalscorer-entry .text-input { padding: 10px 6px; font-size: 10px; }.goalscorer-entry .remove-scorer { width: 25px; }.scorer-total-goals { flex-direction: column; gap: 1px; }.top-scorers-list li { gap: 8px; padding: 13px 10px; }.top-scorers-list li > div > strong { font-size: 11px; }.golden-boot-banner h3 { font-size: 16px; }.readonly-scores strong { width: 35px; height: 38px; }.tournament-viewer-actions > .button { width: 100%; } }
+}

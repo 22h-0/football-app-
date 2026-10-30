@@ -1,0 +1,100 @@
+@layer components {
+  .account-bar { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 16px 18px; margin-bottom: 24px; border: 1px solid #3b4b2e; border-radius: 9px; background: linear-gradient(110deg, #222d1b, #181f16); }
+  .account-bar > div { display: flex; gap: 11px; align-items: center; min-width: 0; }
+  .account-bar > div > svg { flex-shrink: 0; color: #c5f467; }
+  .account-bar > div > span { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+  .account-bar strong { color: #e0ecd4; font-size: 12px; font-weight: 550; overflow-wrap: anywhere; }
+  .account-bar small { color: #a4b591; font-size: 10px; line-height: 1.7; }
+  .account-bar > button, .account-bar > .account-actions { flex-shrink: 0; }
+  .account-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 9px; }
+  .account-bar .button { font-size: 10px; padding: 8px 12px; min-height: 36px; }
+  .account-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #3d4b32; background: #11190e; border-radius: 8px; padding: 4px; margin: 22px 0 24px; gap: 5px; }
+  .account-tabs button { border: 1px solid transparent; border-radius: 5px; background: transparent; color: #a9ba98; padding: 10px 7px; font-size: 12px; font-weight: 500; }
+  .account-tabs button[aria-selected="true"] { background: #c5f46714; border-color: #c5f46732; color: #d6f4a8; }
+  .account-form { margin-top: 22px; }
+  .account-form .field-label { margin-top: 22px; }
+  .account-field-hint { color: #a4b591; font-size: 10px; line-height: 1.8; margin: 8px 0 0; }
+  .account-submit { width: 100%; margin-top: 25px; }
+  .account-submit svg:last-child { margin-left: auto; }
+  .account-privacy { display: flex; gap: 8px; color: #a6b694; font-size: 10px; line-height: 1.8; border-top: 1px solid #34442a; padding-top: 17px; margin: 24px 0 0; }
+  .account-privacy svg { flex-shrink: 0; margin-top: 3px; }
+  .viewer-link-dialog { width: min(550px, calc(100% - 32px)); }
+  .viewer-permissions { display: flex; gap: 12px; background: #c5f46709; border: 1px solid #c5f46723; border-radius: 8px; padding: 15px; margin: 22px 0; }
+  .viewer-permissions > svg { color: #c5f467; flex-shrink: 0; margin-top: 2px; }
+  .viewer-permissions strong { color: #d7e8c4; font-size: 12px; font-weight: 500; }
+  .viewer-permissions p { font-size: 11px; line-height: 1.8; color: #a8bb95; margin: 6px 0 0; }
+  .viewer-link-field { display: flex; align-items: center; gap: 9px; }
+  .viewer-link-field .text-input { min-width: 0; font-size: 11px; text-overflow: ellipsis; }
+  .viewer-link-field .button { font-size: 11px; }
+  .viewer-copy-help, .viewer-link-note { color: #b4c5a0; font-size: 11px; line-height: 1.8; }
+  .viewer-copy-help { padding: 10px 12px; border: 1px solid #c5f46730; background: #c5f46709; border-radius: 6px; }
+  .viewer-replace { border-top: 1px solid #34442a; padding-top: 15px; margin-top: 24px; }
+  .viewer-replace > p, .viewer-replace-confirm > p { color: #a4b792; font-size: 10px; line-height: 1.8; margin: 0 0 10px; }
+  .viewer-replace-confirm { border: 1px solid #d6a16d50; background: #d6a16d08; padding: 13px; border-radius: 7px; }
+  .viewer-replace-confirm strong { display: block; color: #edd2a5; font-size: 12px; font-weight: 500; }
+  .viewer-replace-confirm > div { display: flex; flex-wrap: wrap; gap: 9px; }
+  .viewer-replace-confirm .button { font-size: 10px; }
+  .viewer-create { width: 100%; margin-top: 8px; }
+  .viewer-copy-help, .viewer-link-note, .viewer-permissions, .viewer-replace, .viewer-link-dialog .dialog-description { overflow-wrap: anywhere; }
+  .shared-page { min-height: 100vh; }
+  .shared-header { max-width: 1400px; margin: 0 auto; padding: 23px 40px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #2f3b26; }
+  .shared-header .brand { padding: 0; }
+  .spectator-badge { display: flex; align-items: center; gap: 7px; font-size: 10px; color: #c9e2aa; border: 1px solid #c5f4672b; background: #c5f46708; padding: 8px 10px; border-radius: 20px; white-space: nowrap; }
+  .shared-main { max-width: 1260px; padding: 28px 40px 0; margin: 0 auto; }
+  .spectator-notice { display: flex; gap: 12px; align-items: center; border: 1px solid #3b4b2e; background: #c5f46706; border-radius: 8px; padding: 16px; }
+  .spectator-notice > svg { color: #c5f467; flex-shrink: 0; }
+  .spectator-notice strong { font-size: 12px; font-weight: 550; color: #dfebd2; }
+  .spectator-notice p { margin: 5px 0 0; font-size: 11px; line-height: 1.8; color: #a8b995; }
+  .shared-update-bar { margin: 17px 0; display: flex; gap: 15px; justify-content: space-between; align-items: center; }
+  .shared-update-bar > span { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-size: 10px; color: #b1c29e; min-width: 0; }
+  .shared-update-bar small { color: #8fa67a; font-size: 9px; margin-left: 7px; }
+  .shared-update-bar .button { flex-shrink: 0; font-size: 10px; }
+  .shared-error { display: flex; gap: 12px; padding: 15px; margin: 20px 0; border: 1px solid #d6a16d50; background: #d6a16d09; border-radius: 8px; }
+  .shared-error > svg { color: #e2bc8d; flex-shrink: 0; margin-top: 2px; }
+  .shared-error strong { color: #e8d1ad; font-size: 12px; font-weight: 500; }
+  .shared-error p { color: #c1b08e; font-size: 11px; line-height: 1.8; margin: 6px 0 0; overflow-wrap: anywhere; }
+  .shared-empty { text-align: center; padding: 60px 18px 70px; border: 1px solid #3a4b2d; border-radius: 11px; margin-top: 28px; background: #c5f46703; }
+  .shared-empty > span { display: inline-grid; place-items: center; width: 78px; height: 78px; border-radius: 50%; color: #c5f467; background: #c5f4670a; }
+  .shared-empty h1 { font-size: 32px; font-weight: 550; letter-spacing: -1px; line-height: 1.2; margin-top: 23px; }
+  .shared-empty p { max-width: 420px; margin: 14px auto 23px; color: #a6b993; font-size: 12px; line-height: 1.8; }
+  .shared-footer { padding: 25px 0; border-top: 1px solid #2f3d25; margin-top: 35px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+  .shared-footer > span { font-size: 8px; letter-spacing: 1px; color: #8fa47a; }
+  .shared-footer > a { color: #c4d9a8; font-size: 10px; }
+  .shared-footer > a:hover { color: #c5f467; }
+  .shared-page .toast { left: 50%; }
+  .refresh-spinning { animation: refresh-spin 1s linear infinite; }
+  @keyframes refresh-spin { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) {
+    .account-bar { padding: 14px; gap: 12px; align-items: start; flex-direction: column; }
+    .account-bar strong { font-size: 11px; }
+    .account-bar small { font-size: 10px; }
+    .account-bar > .account-actions { justify-content: start; }
+    .shared-header { padding: 19px 22px; gap: 12px; }
+    .shared-header .brand { font-size: 25px; }
+    .spectator-badge { font-size: 9px; padding: 7px 9px; gap: 5px; }
+    .shared-main { padding: 24px 22px 0; }
+    .spectator-notice { padding: 14px; align-items: start; }
+    .spectator-notice > svg { margin-top: 2px; }
+    .spectator-notice p { font-size: 10px; }
+    .shared-update-bar small { margin-left: 0; flex-basis: 100%; }
+    .shared-update-bar > span > svg { display: none; }
+    .shared-empty { padding: 42px 18px; }
+    .shared-empty h1 { font-size: 28px; }
+    .shared-empty p { font-size: 11px; }
+    .shared-footer { align-items: start; flex-direction: column; gap: 12px; }
+  }
+  @media (max-width: 420px) {
+    .viewer-link-field { align-items: stretch; flex-direction: column; }
+    .viewer-link-field .button { min-height: 42px; }
+    .viewer-replace-confirm > div { flex-direction: column; align-items: stretch; }
+    .viewer-replace-confirm .button { min-height: 40px; }
+    .shared-header { padding-left: 16px; padding-right: 16px; }
+    .shared-header .brand { font-size: 23px; }
+    .shared-header .brand-mark { width: 23px; margin-right: 3px; }
+    .spectator-badge { font-size: 8px; gap: 4px; padding: 7px; }
+    .spectator-badge svg { width: 12px; }
+    .shared-main { padding-left: 16px; padding-right: 16px; }
+    .shared-update-bar { gap: 10px; }
+    .shared-update-bar .button { padding: 8px 10px; }
+  }
+}
