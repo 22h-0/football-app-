@@ -6,13 +6,15 @@ The interface uses a dark sports palette, lime accents, color-coded teams, keybo
 
 ## Shared website with creator-only editing
 
+[Start the Render deployment](https://render.com/deploy?repo=https://github.com/22h-0/football-app-). This opens the hosting setup for this repository; it is not an already-live website. The supplied plan includes a paid web service and persistent disk. Review those charges before confirming deployment. Render supplies the assigned HTTPS address automatically.
+
 Only the account that creates a tournament can edit scores, goalscorers, kickoff times, sharing, or delete it. The Express/SQLite API checks ownership on every write. Group members open a read-only spectator link without signing in; its results refresh every 10 seconds. Other accounts cannot change your tournament, even by submitting API requests directly.
 
 Use Node.js 24. Run `npm ci`, then `npm run dev:server` and `npm run dev:shared` in two terminals. The frontend proxies `/api` to the server on port 3001. For deployment, use `npm run build:shared` and `npm start`, or the supplied Dockerfile. Express serves the frontend and API together.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for Docker, HTTPS, persistent data, and the optional Render blueprint. A hosting account is still required to obtain a public URL; no website has been deployed by preparing this code. The Render blueprint uses a paid web service and persistent disk. Upload the updated project files to your repository before connecting it to a hosting provider. Static-only hosting cannot run this shared version.
 
-Production requires `NODE_ENV=production`, `APP_ORIGIN` set to the actual HTTPS origin, and a writable persistent `DATA_DIR`. Accounts, hashed passwords/sessions, and tournament data live in SQLite. Preserve that database across deploys and run a single application instance. Email password recovery is not implemented, so keep the creator password safe.
+Production requires `NODE_ENV=production`, a trusted HTTPS origin, and a writable persistent `DATA_DIR`. Render's assigned origin is discovered automatically from `RENDER_EXTERNAL_URL`; set `APP_ORIGIN` explicitly for custom domains or other hosts. Accounts, hashed passwords/sessions, and tournament data live in SQLite. Preserve that database across deploys and run a single application instance. Email password recovery is not implemented, so keep the creator password safe.
 
 After deployment, sign in, create a tournament, and choose **Share viewer link**. Send that link to your group. Replacing a viewer link revokes the old link. The website can be installed using the browser's Install app/Add to Home Screen action. Its service worker caches only public app assets, never private API responses or tournament payloads.
 

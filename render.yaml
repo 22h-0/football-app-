@@ -17,8 +17,6 @@ services:
         value: "10000"
       - key: DATA_DIR
         value: /data
-      - key: APP_ORIGIN
-        sync: false
     disk:
       name: sideline-data
       mountPath: /data
