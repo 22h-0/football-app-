@@ -6,13 +6,15 @@ The interface uses a dark sports palette, lime accents, color-coded teams, keybo
 
 ## Shared website with creator-only editing
 
-[Start the Render deployment](https://render.com/deploy?repo=https://github.com/22h-0/football-app-). This opens the hosting setup for this repository; it is not an already-live website. The supplied plan includes a paid web service and persistent disk. Review those charges before confirming deployment. Render supplies the assigned HTTPS address automatically.
+**Free Cloudflare hosting:** [Deploy to Cloudflare](https://deploy.workers.cloudflare.com/?url=https://github.com/22h-0/football-app-). Open this official setup link while signed into your Cloudflare Free account. It publishes the app and creates its free D1 database; no paid server or custom domain is needed. See [CLOUDFLARE.md](CLOUDFLARE.md) for the exact steps and free limits. This is a setup link, not an already-live website address.
 
-Only the account that creates a tournament can edit scores, goalscorers, kickoff times, sharing, or delete it. The Express/SQLite API checks ownership on every write. Group members open a read-only spectator link without signing in; its results refresh every 10 seconds. Other accounts cannot change your tournament, even by submitting API requests directly.
+The Cloudflare version uses passkeys (Face ID, fingerprint, device screen lock, or a security key) for organizer sign-in. Passwords are still supported by the separate Node deployment. Both versions enforce creator-only editing at the API. Database initialization is automatic on the first Cloudflare API request, and no account is created until the organizer completes passkey verification.
+
+Only the account that creates a tournament can edit scores, goalscorers, kickoff times, sharing, or delete it. Both the Node/SQLite and Cloudflare/D1 APIs check ownership on every write. Group members open a read-only spectator link without signing in; its results refresh every 10 seconds. Other accounts cannot change your tournament, even by submitting API requests directly.
 
 Use Node.js 24. Run `npm ci`, then `npm run dev:server` and `npm run dev:shared` in two terminals. The frontend proxies `/api` to the server on port 3001. For deployment, use `npm run build:shared` and `npm start`, or the supplied Dockerfile. Express serves the frontend and API together.
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for Docker, HTTPS, persistent data, and the optional Render blueprint. A hosting account is still required to obtain a public URL; no website has been deployed by preparing this code. The Render blueprint uses a paid web service and persistent disk. Upload the updated project files to your repository before connecting it to a hosting provider. Static-only hosting cannot run this shared version.
+For the optional self-hosted Node version, see [DEPLOYMENT.md](DEPLOYMENT.md) for Docker, HTTPS, persistent data, and its hosting blueprint. A hosting account is still required to obtain a public URL; no website has been deployed by preparing this code. The Render blueprint uses a paid web service and persistent disk. Upload the updated project files to your repository before connecting it to a hosting provider. Static-only hosting cannot run this shared version.
 
 Production requires `NODE_ENV=production`, a trusted HTTPS origin, and a writable persistent `DATA_DIR`. Render's assigned origin is discovered automatically from `RENDER_EXTERNAL_URL`; set `APP_ORIGIN` explicitly for custom domains or other hosts. Accounts, hashed passwords/sessions, and tournament data live in SQLite. Preserve that database across deploys and run a single application instance. Email password recovery is not implemented, so keep the creator password safe.
 
@@ -20,7 +22,7 @@ After deployment, sign in, create a tournament, and choose **Share viewer link**
 
 `src/hooks/useCloudTournaments.js` handles creator state and spectator polling. `server/` contains authentication, validation, SQLite storage, and authorization tests. `public/manifest.webmanifest` and `public/sw.js` provide the installable website shell. Shared account credentials are not stored in LocalStorage.
 
-Validation commands: `npm test` (79 client tests), `npm run test:server` (10 real HTTP/SQLite tests), and `npm run test:sharing` (4 desktop/mobile creator/viewer flows). The existing local workflow tests remain available below. `npm run build` still builds offline/local mode; use **build:shared** for the shared website.
+Validation commands: `npm test` (89 client tests), `npm run test:worker` (10 real Cloudflare/D1 tests), `npm run test:cloudflare` (4 real passkey browser flows), `npm run test:deploy` (5 deployment-helper tests), plus `npm run test:server` and `npm run test:sharing` for the retained Node version. The existing local workflow tests remain available below. `npm run build` still builds offline/local mode; use **build:shared** for the shared website.
 
 ## Goalscorers
 

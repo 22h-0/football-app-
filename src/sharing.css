@@ -1,4 +1,8 @@
 @layer components {
+  .passkey-explanation { display: flex; align-items: start; gap: 12px; padding: 15px; margin: 18px 0 0; border-radius: 8px; border: 1px solid #c5f4672a; background: #c5f46708; }
+  .passkey-explanation > svg { flex-shrink: 0; color: #c5f467; margin-top: 2px; }
+  .passkey-explanation strong { font-size: 12px; font-weight: 550; color: #d9edc1; }
+  .passkey-explanation p { margin: 6px 0 0; font-size: 11px; color: #b6cda0; line-height: 1.8; }
   .account-bar { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 16px 18px; margin-bottom: 24px; border: 1px solid #3b4b2e; border-radius: 9px; background: linear-gradient(110deg, #222d1b, #181f16); }
   .account-bar > div { display: flex; gap: 11px; align-items: center; min-width: 0; }
   .account-bar > div > svg { flex-shrink: 0; color: #c5f467; }

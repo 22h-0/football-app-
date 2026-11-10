@@ -1,6 +1,9 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 import { CLOUD_ACTIVE_KEY, useCloudTournaments, useSharedTournament } from './useCloudTournaments.js';
+
+vi.mock('@simplewebauthn/browser', () => ({ startRegistration: vi.fn(), startAuthentication: vi.fn() }));
 
 const alice = { id: 'owner-a', username: 'alice' };
 const bob = { id: 'owner-b', username: 'bob' };
@@ -11,8 +14,12 @@ async function flush() { await act(async () => {}); }
 async function loaded(result) { await waitFor(() => expect(result.current.activeTournament).not.toBeNull()); }
 function accountResponses(...rest) { fetch.mockResolvedValueOnce(response({ user: alice })).mockResolvedValueOnce(response({ tournaments: [cup()] })); rest.forEach((item) => fetch.mockResolvedValueOnce(item)); }
 
-beforeEach(() => { localStorage.clear(); vi.stubGlobal('fetch', vi.fn()); });
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+const originalCredentials = Object.getOwnPropertyDescriptor(navigator, 'credentials');
+beforeEach(() => { localStorage.clear(); vi.stubGlobal('fetch', vi.fn()); startAuthentication.mockReset(); startRegistration.mockReset(); });
+afterEach(() => {
+  cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals();
+  if (originalCredentials) Object.defineProperty(navigator, 'credentials', originalCredentials); else delete navigator.credentials;
+});
 
 describe('cloud tournament state', () => {
   it('does not contact a server from standalone mode', () => {
@@ -27,6 +34,7 @@ describe('cloud tournament state', () => {
     const { result } = renderHook(() => useCloudTournaments(true));
     await waitFor(() => expect(result.current.available).toBe(true));
     expect(result.current.user).toBeNull();
+    expect(result.current.authMode).toBe('password');
     expect(result.current.tournaments).toEqual([]);
     expect(result.current.loading).toBe(false);
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -145,6 +153,121 @@ describe('cloud tournament state', () => {
     expect(result.current.user).toEqual(alice);
     expect(result.current.error).toMatch(/server is unavailable/i);
     expect(result.current.tournaments).toEqual([]);
+  });
+});
+
+describe('passkey authentication', () => {
+  function enablePasskeys() {
+    vi.stubGlobal('PublicKeyCredential', class {});
+    Object.defineProperty(navigator, 'credentials', { configurable: true, value: { create: vi.fn(), get: vi.fn() } });
+  }
+  const registration = {
+    challenge: 'Y2hhbGxlbmdl', rp: { id: 'localhost', name: 'Sideline' },
+    user: { id: 'YWxpY2U', name: 'alice', displayName: 'Alice' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+  };
+  const authentication = { challenge: 'Y2hhbGxlbmdl', rpId: 'localhost', allowCredentials: [{ type: 'public-key', id: 'Y3JlZA' }] };
+  async function ready(result) { await waitFor(() => expect(result.current.authMode).toBe('passkey')); }
+
+  it('registers a passkey and loads account tournaments without sending a password', async () => {
+    enablePasskeys();
+    const credential = { id: 'credential-id', type: 'public-key', response: { clientDataJSON: 'client-data' } };
+    startRegistration.mockResolvedValue(credential);
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }))
+      .mockResolvedValueOnce(response({ challengeId: 'registration-challenge', options: registration }))
+      .mockResolvedValueOnce(response({ user: alice }))
+      .mockResolvedValueOnce(response({ tournaments: [cup()] }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    await act(async () => { expect(await result.current.register('alice', 'not-used-for-passkeys')).toBeNull(); });
+    expect(startRegistration).toHaveBeenCalledExactlyOnceWith({ optionsJSON: registration });
+    expect(startAuthentication).not.toHaveBeenCalled();
+    expect(fetch.mock.calls[1][0]).toBe('/api/passkeys/register/options');
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ username: 'alice' });
+    expect(fetch.mock.calls[2][0]).toBe('/api/passkeys/register/verify');
+    expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({ challengeId: 'registration-challenge', response: credential });
+    expect(fetch.mock.calls[2][1].credentials).toBe('same-origin');
+    expect(result.current.user).toEqual(alice);
+    expect(result.current.activeTournament.id).toBe('cup-a');
+    expect(localStorage.length).toBe(1);
+    expect(localStorage.getItem(CLOUD_ACTIVE_KEY)).toBe('cup-a');
+  });
+
+  it('signs in with an existing passkey and preserves server-selected authentication mode', async () => {
+    enablePasskeys();
+    const assertion = { id: 'credential-id', type: 'public-key', response: { authenticatorData: 'signed-data' } };
+    startAuthentication.mockResolvedValue(assertion);
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }))
+      .mockResolvedValueOnce(response({ challengeId: 'login-challenge', options: authentication }))
+      .mockResolvedValueOnce(response({ user: alice }))
+      .mockResolvedValueOnce(response({ tournaments: [] }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    await act(async () => { expect(await result.current.login('alice')).toBeNull(); });
+    expect(startAuthentication).toHaveBeenCalledExactlyOnceWith({ optionsJSON: authentication });
+    expect(fetch.mock.calls[1][0]).toBe('/api/passkeys/login/options');
+    expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({ challengeId: 'login-challenge', response: assertion });
+    expect(result.current.authMode).toBe('passkey');
+    expect(result.current.canEdit).toBe(true);
+  });
+
+  it('explains a canceled ceremony and never submits a verification request', async () => {
+    enablePasskeys();
+    startAuthentication.mockRejectedValue(Object.assign(new Error('Browser detail'), { name: 'WebAuthnError', cause: { name: 'NotAllowedError' } }));
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }))
+      .mockResolvedValueOnce(response({ challengeId: 'challenge', options: authentication }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    let message;
+    await act(async () => { message = await result.current.login('alice'); });
+    expect(message).toMatch(/canceled or timed out/i);
+    expect(result.current.error).toBe(message);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.user).toBeNull();
+    expect(fetch.mock.calls.some(([url]) => url.includes('/verify'))).toBe(false);
+  });
+
+  it('rejects malformed server options before opening the browser credential prompt', async () => {
+    enablePasskeys();
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }))
+      .mockResolvedValueOnce(response({ challengeId: 'challenge', options: { challenge: 'Y2hhbGxlbmdl' } }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    await act(async () => { expect(await result.current.register('alice')).toMatch(/invalid passkey options/i); });
+    expect(startRegistration).not.toHaveBeenCalled();
+    expect(startAuthentication).not.toHaveBeenCalled();
+    expect(fetch.mock.calls.some(([url]) => url.includes('/verify'))).toBe(false);
+  });
+
+  it('does not verify or restore an account after signing out during a passkey ceremony', async () => {
+    enablePasskeys();
+    const ceremony = deferred();
+    startAuthentication.mockImplementation(() => ceremony.promise);
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }))
+      .mockResolvedValueOnce(response({ challengeId: 'challenge', options: authentication }))
+      .mockResolvedValueOnce(response({ ok: true }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    let pending;
+    act(() => { pending = result.current.login('alice'); });
+    await waitFor(() => expect(startAuthentication).toHaveBeenCalledTimes(1));
+    await act(async () => { await result.current.logout(); });
+    let message;
+    await act(async () => { ceremony.resolve({ id: 'credential', response: {} }); message = await pending; });
+    expect(message).toMatch(/account changed/i);
+    expect(fetch.mock.calls.some(([url]) => url.includes('/verify'))).toBe(false);
+    expect(result.current.user).toBeNull();
+    expect(result.current.tournaments).toEqual([]);
+  });
+
+  it('reports unsupported browsers without requesting options or falling back to passwords', async () => {
+    vi.stubGlobal('PublicKeyCredential', undefined);
+    fetch.mockResolvedValueOnce(response({ user: null, authMode: 'passkey' }));
+    const { result } = renderHook(() => useCloudTournaments(true));
+    await ready(result);
+    await act(async () => { expect(await result.current.login('alice')).toMatch(/does not support passkeys.*HTTPS/i); });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(startAuthentication).not.toHaveBeenCalled();
+    expect(result.current.authMode).toBe('passkey');
   });
 });
 

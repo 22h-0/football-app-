@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sideline-football",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-07-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "send_metrics": false,
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
+  "build": {
+    "command": "npm run build:shared"
+  },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sideline",
+      "migrations_dir": "./cloudflare/migrations"
+    }
+  ]
+}

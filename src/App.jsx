@@ -14,6 +14,7 @@ import { useRoster } from './hooks/useRoster.js';
 import { useTournaments } from './hooks/useTournaments.js';
 import { useCloudTournaments } from './hooks/useCloudTournaments.js';
 import { balanceTeams } from './lib/balanceTeams.js';
+import { usesSharedWebsite } from './lib/hosting.js';
 
 export default function App() {
   const sharedPath = window.location.pathname.match(/^\/watch\/([^/]+)\/?$/);
@@ -24,7 +25,7 @@ export default function App() {
 function Clubhouse() {
   const roster = useRoster();
   const localTournaments = useTournaments();
-  const sharedMode = import.meta.env.VITE_SHARED_MODE === 'true' && window.location.protocol !== 'file:';
+  const sharedMode = usesSharedWebsite(window.location, import.meta.env.VITE_SHARED_MODE === 'true');
   const cloud = useCloudTournaments(sharedMode);
   const tournaments = sharedMode ? cloud : localTournaments;
   const [view, setView] = useState('match');

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 
 export const CLOUD_ACTIVE_KEY = 'sideline.cloud.active.v1';
 const OFFLINE = 'The shared tournament server is unavailable. Live sharing is not connected.';
@@ -30,9 +31,45 @@ function savedActiveId() { try { return localStorage.getItem(CLOUD_ACTIVE_KEY); 
 function validUser(user) { return user === null || (typeof user?.id === 'string' && typeof user?.username === 'string'); }
 function validCup(cup) { return typeof cup?.id === 'string' && typeof cup?.name === 'string' && Number.isInteger(cup.revision) && cup.revision >= 0 && Array.isArray(cup.teams) && Array.isArray(cup.fixtures); }
 
+function supportsPasskeys(kind) {
+  return window.isSecureContext !== false && typeof window.PublicKeyCredential === 'function'
+    && typeof navigator.credentials?.[kind === 'register' ? 'create' : 'get'] === 'function';
+}
+
+function validPasskeyOptions(kind, data) {
+  const options = data?.options;
+  if (typeof data?.challengeId !== 'string' || !data.challengeId || data.challengeId.length > 256
+    || !options || typeof options !== 'object' || Array.isArray(options)
+    || typeof options.challenge !== 'string' || !/^[A-Za-z0-9_-]{1,1024}$/.test(options.challenge)) return false;
+  if (kind === 'register') {
+    return typeof options.rp?.name === 'string' && !!options.rp.name
+      && (options.rp.id === undefined || typeof options.rp.id === 'string')
+      && typeof options.user?.id === 'string' && !!options.user.id
+      && typeof options.user.name === 'string' && !!options.user.name
+      && typeof options.user.displayName === 'string'
+      && Array.isArray(options.pubKeyCredParams) && options.pubKeyCredParams.length > 0
+      && options.pubKeyCredParams.every((param) => param?.type === 'public-key' && Number.isInteger(param.alg));
+  }
+  return (options.rpId === undefined || typeof options.rpId === 'string')
+    && (options.allowCredentials === undefined || (Array.isArray(options.allowCredentials)
+      && options.allowCredentials.every((credential) => credential?.type === 'public-key' && typeof credential.id === 'string' && !!credential.id)));
+}
+
+function passkeyError(error, kind) {
+  if (error instanceof APIError) return error.message;
+  const names = [error?.name, error?.cause?.name];
+  if (names.some((name) => ['AbortError', 'NotAllowedError'].includes(name)) || error?.code === 'ERROR_CEREMONY_ABORTED') {
+    return `Passkey ${kind === 'register' ? 'creation' : 'sign-in'} was canceled or timed out. Please try again.`;
+  }
+  if (names.includes('InvalidStateError') && kind === 'register') return 'A passkey for this account may already exist. Try signing in instead.';
+  if (names.includes('SecurityError')) return 'Passkeys require a secure website address. Open the HTTPS link and try again.';
+  if (names.includes('NotSupportedError')) return 'This device cannot use this passkey. Try a compatible browser or security key.';
+  return 'The passkey request could not be completed. Please try again.';
+}
+
 /** Cookie-authenticated cloud state. Only the active ID is stored locally. */
 export function useCloudTournaments(enabled) {
-  const [state, setState] = useState({ available: enabled ? null : false, user: null, loading: !!enabled, error: null, storageError: null, tournaments: [], activeId: null });
+  const [state, setState] = useState({ available: enabled ? null : false, authMode: 'password', user: null, loading: !!enabled, error: null, storageError: null, tournaments: [], activeId: null });
   const latest = useRef(state);
   const alive = useRef(true);
   const active = useRef(!!enabled);
@@ -82,10 +119,10 @@ export function useCloudTournaments(enabled) {
     const ticket = ++epoch.current;
     const controller = new AbortController();
     if (!enabled) {
-      commit({ available: false, user: null, tournaments: [], activeId: null, loading: false, error: null });
+      commit({ available: false, authMode: 'password', user: null, tournaments: [], activeId: null, loading: false, error: null });
       return () => { alive.current = false; epoch.current += 1; controller.abort(); };
     }
-    commit({ available: null, user: null, tournaments: [], activeId: null, loading: true, error: null });
+    commit({ available: null, authMode: 'password', user: null, tournaments: [], activeId: null, loading: true, error: null });
     (async () => {
       let sessionFound = false;
       try {
@@ -93,7 +130,7 @@ export function useCloudTournaments(enabled) {
         if (!data || !Object.hasOwn(data, 'user') || !validUser(data.user)) throw new APIError('The shared tournament server returned an invalid session.');
         if (!alive.current || ticket !== epoch.current) return;
         sessionFound = true;
-        commit({ available: true, user: data.user, loading: !!data.user, error: null });
+        commit({ available: true, authMode: data.authMode === 'passkey' ? 'passkey' : 'password', user: data.user, loading: !!data.user, error: null });
         if (data.user) await loadList(ticket, controller.signal);
       } catch (error) {
         if (!alive.current || ticket !== epoch.current || error.name === 'AbortError') return;
@@ -107,20 +144,32 @@ export function useCloudTournaments(enabled) {
 
   async function authenticate(kind, username, password) {
     if (!active.current || !latest.current.available) return OFFLINE;
+    const usingPasskey = latest.current.authMode === 'passkey';
     const ticket = ++epoch.current;
     commit({ user: null, tournaments: [], activeId: null, loading: true, error: null });
     try {
-      const data = await requestJSON(`/api/${kind}`, { method: 'POST', body: { username, password } });
+      let data;
+      if (usingPasskey) {
+        if (!supportsPasskeys(kind)) throw new APIError('This browser does not support passkeys. Open this site over HTTPS in a recent browser with passkey support.');
+        const prefix = `/api/passkeys/${kind}`;
+        const challenge = await requestJSON(`${prefix}/options`, { method: 'POST', body: { username } });
+        if (!alive.current || ticket !== epoch.current) return 'The account changed. Please try again.';
+        if (!validPasskeyOptions(kind, challenge)) throw new APIError('The server returned invalid passkey options. Please try again.');
+        const response = await (kind === 'register' ? startRegistration : startAuthentication)({ optionsJSON: challenge.options });
+        if (!alive.current || ticket !== epoch.current) return 'The account changed. Please try again.';
+        data = await requestJSON(`${prefix}/verify`, { method: 'POST', body: { challengeId: challenge.challengeId, response } });
+      } else data = await requestJSON(`/api/${kind}`, { method: 'POST', body: { username, password } });
       if (!data.user || !validUser(data.user)) throw new APIError('The server did not return a valid account.');
       if (!alive.current || ticket !== epoch.current) return 'The account changed. Please try again.';
       commit({ user: data.user, available: true });
       await loadList(ticket);
       return ticket === epoch.current ? null : 'The account changed. Please try again.';
     } catch (error) {
+      const message = usingPasskey ? passkeyError(error, kind) : error.message;
       if (alive.current && ticket === epoch.current) {
-        if (error.status === 401) clearAccount(error.message); else commit({ user: null, tournaments: [], activeId: null, loading: false, error: error.message });
+        if (error.status === 401) clearAccount(message); else commit({ user: null, tournaments: [], activeId: null, loading: false, error: message });
       }
-      return error.message;
+      return message;
     }
   }
 
