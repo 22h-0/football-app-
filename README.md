@@ -226,7 +226,7 @@ The UI includes labeled inputs and controls, visible keyboard focus, native moda
 
 ## Validation
 
-Run `npm test` for 45 balancing, roster, tournament engine, and tournament persistence tests. These cover input validation, team membership and size constraints, repeatable seeded generation, small-case optimality, player mutations, reload persistence, malformed storage, and unavailable storage. Run `npm run build` to verify the production bundle.
+Run `npm test` for 89 client tests covering balancing, roster and tournament persistence, goalscorers, shared account state, passkey flows, and hosting mode. These cover input validation, team membership and size constraints, repeatable seeded generation, small-case optimality, player mutations, reload persistence, malformed storage, and unavailable storage. Run `npm run build` to verify the local-mode production bundle or `npm run build:shared` for the shared website.
 
 Run the desktop and mobile browser suite with:
 
